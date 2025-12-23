@@ -36,15 +36,29 @@ function fetchPage(pageNumber) {
 }
 
 function transformProduct(product) {
+  // searching for categories_tags if empty, skip product
+  if (!product.categories_tags || product.categories_tags.length === 0) {
+    return null;
+  }
+
+  // formatting categories field(deleting "en:" prefix and replacing "-" with " ")
+  const categories = product.categories_tags
+    .filter(tag => tag.startsWith('en:'))
+    .map(tag => tag.replace('en:', '').replace(/-/g, ' ')) // "en:dairy-products" -> "dairy products"
+    .slice(0, 5); // max 5 categories
+
+  // If no categories after filtering, skip product
+  if (categories.length === 0) {
+    return null;
+  }
+
   return {
     id: product.code || `product_${Math.random().toString(36).substr(2, 9)}`,
     name: product.product_name || 'Unknown Product',
     brand: product.brands || 'Unknown',
-    categories: product.categories 
-      ? product.categories.split(',').map(c => c.trim()).filter(Boolean).slice(0, 5)
-      : [],
-    countries: product.countries 
-      ? product.countries.split(',').map(c => c.trim()).filter(Boolean)
+    categories: categories,
+    countries: product.countries_tags 
+      ? product.countries_tags.map(tag => tag.replace('en:', '').replace(/-/g, ' ')).slice(0, 3)
       : [],
     image_url: product.image_url || product.image_front_url || null
   };
@@ -57,7 +71,7 @@ async function importData() {
   console.log('Starting import from Open Food Facts...');
   console.log(`Will fetch ${totalPages} pages × 100 products = ~${totalPages * 100} products\n`);
   
-  for (let page = 1; page <= totalPages; page++) {
+  for (let page = 15; page <= totalPages; page++) {
     try {
       const products = await fetchPage(page);
       
@@ -69,6 +83,7 @@ async function importData() {
       allProducts.push(...products);
       console.log(`Page ${page}/${totalPages} - Got ${products.length} products (Total: ${allProducts.length})`);
       
+      // Небольшая задержка чтобы не нагружать API
       await new Promise(resolve => setTimeout(resolve, 500));
       
     } catch (error) {
@@ -77,13 +92,15 @@ async function importData() {
   }
   
   console.log(`\nFetched total: ${allProducts.length} products`);
-  console.log('Transforming data...');
+  console.log('Transforming and filtering data...');
   
   const validProducts = allProducts
-    .filter(p => p.product_name && p.code)
-    .map(transformProduct);
+    .filter(p => p.product_name && p.code) // базовая валидация
+    .map(transformProduct)
+    .filter(p => p !== null); // убираем null (продукты без categories_tags)
   
   console.log(`Valid products after filtering: ${validProducts.length}`);
+  console.log(`Skipped: ${allProducts.length - validProducts.length} products without categories_tags`);
   console.log('\nStarting upload to Supabase...');
   
   const batchSize = 50;
