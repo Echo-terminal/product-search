@@ -1,0 +1,46 @@
+<div class="container">
+  <h1>Product Search</h1>
+  
+  <!-- Поисковая строка -->
+  <div class="search-box">
+    <input 
+      type="text" 
+      [ngModel]="searchQuery()" 
+      (ngModelChange)="onSearchChange($event)"
+      placeholder="Search products..."
+      class="search-input"
+    />
+  </div>
+
+  <!-- Загрузка -->
+  @if (loading()) {
+    <div class="loading">
+      Loading...
+    </div>
+  }
+
+  <!-- Список продуктов -->
+  @if (!loading()) {
+    <div class="products-grid">
+      @for (product of products(); track product.id) {
+        <div class="product-card">
+          <img 
+            [src]="product.image_url || 'https://via.placeholder.com/150'" 
+            [alt]="product.name"
+            class="product-image"
+          />
+          <h3>{{ product.name }}</h3>
+          <p class="brand">{{ product.brand }}</p>
+          <p class="categories">{{ product.categories.slice(0, 2).join(', ') }}</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Если ничего не найдено -->
+  @if (!loading() && products().length === 0) {
+    <div class="no-results">
+      No products found
+    </div>
+  }
+</div>
