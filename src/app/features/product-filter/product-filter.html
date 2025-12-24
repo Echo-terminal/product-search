@@ -1,0 +1,37 @@
+<div class="filters">
+  <div class="filter-header">
+    <h3>Filters</h3>
+    @if (hasActiveFilters()) {
+      <button class="clear-btn" (click)="onClearFilters()">
+        Clear All
+      </button>
+    }
+  </div>
+
+  <div class="filter-section">
+    <h4>Categories ({{ totalCategories() }})</h4>
+    <div class="filter-list">
+      @for (cat of displayedCategories(); track cat.category) {
+        <label class="filter-item">
+          <input 
+            type="checkbox"
+            [checked]="isCategorySelected(cat.category)"
+            (change)="onCategoryToggle(cat.category)"
+          />
+          <span class="filter-label">{{ cat.category }}</span>
+          <span class="filter-count">({{ cat.count }})</span>
+        </label>
+      }
+
+      @if (loadingCategories()) {
+        <div class="loading-more">Loading...</div>
+      }
+    </div>
+
+    @if (hasMoreCategories() && !loadingCategories()) {
+      <button class="load-more-btn" (click)="onLoadMore()">
+        Show More ({{ displayedCount() }} of {{ totalCategories() }})
+      </button>
+    }
+  </div>
+</div>

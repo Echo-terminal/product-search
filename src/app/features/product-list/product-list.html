@@ -1,0 +1,85 @@
+@if (loading()) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Loading products...</p>
+  </div>
+}
+
+@if (!loading() && !hasProducts()) {
+  <div class="no-results">
+    <p>No products found</p>
+    @if (searchQuery()) {
+      <p class="hint">Try a different search term</p>
+    } @else {
+      <p class="hint">Try adjusting your filters</p>
+    }
+  </div>
+}
+
+@if (!loading() && hasProducts()) {
+  <div class="products-grid">
+    @for (product of products(); track product.id) {
+      <article class="product-card">
+        <div class="product-image-wrapper">
+          <img 
+            [src]="product.image_url || 'https://via.placeholder.com/200?text=No+Image'" 
+            [alt]="product.name"
+            class="product-image"
+            loading="lazy"
+          />
+        </div>
+        <div class="product-info">
+          <h3 class="product-name" [title]="product.name">
+            {{ product.name }}
+          </h3>
+          <p class="product-brand">{{ product.brand }}</p>
+          @if (product.categories.length > 0) {
+            <div class="product-categories">
+              @for (category of product.categories.slice(0, 3); track category) {
+                <span class="category-tag">{{ category }}</span>
+              }
+            </div>
+          }
+        </div>
+      </article>
+    }
+  </div>
+
+  <!-- Пагинация -->
+  @if (hasMultiplePages()) {
+    <nav class="pagination" aria-label="Product pagination">
+      <button 
+        class="pagination-btn"
+        [disabled]="isFirstPage()"
+        (click)="onPrevious()"
+        aria-label="Previous page">
+        ← Previous
+      </button>
+
+      <div class="pagination-pages">
+        @for (page of getPaginationPages(); track $index) {
+          @if (page === '...') {
+            <span class="pagination-dots">...</span>
+          } @else {
+            <button 
+              class="pagination-page"
+              [class.active]="page === pagination().currentPage"
+              (click)="onGoToPage(+page)"
+              [attr.aria-label]="'Go to page ' + page"
+              [attr.aria-current]="page === pagination().currentPage ? 'page' : null">
+              {{ page }}
+            </button>
+          }
+        }
+      </div>
+
+      <button 
+        class="pagination-btn"
+        [disabled]="isLastPage()"
+        (click)="onNext()"
+        aria-label="Next page">
+        Next →
+      </button>
+    </nav>
+  }
+}

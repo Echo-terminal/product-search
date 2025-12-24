@@ -1,46 +1,57 @@
-<div class="container">
-  <h1>Product Search</h1>
-  
-  <!-- Поисковая строка -->
-  <div class="search-box">
-    <input 
-      type="text" 
-      [ngModel]="searchQuery()" 
-      (ngModelChange)="onSearchChange($event)"
-      placeholder="Search products..."
-      class="search-input"
-    />
-  </div>
-
-  <!-- Загрузка -->
-  @if (loading()) {
-    <div class="loading">
-      Loading...
-    </div>
-  }
-
-  <!-- Список продуктов -->
-  @if (!loading()) {
-    <div class="products-grid">
-      @for (product of products(); track product.id) {
-        <div class="product-card">
-          <img 
-            [src]="product.image_url || 'https://via.placeholder.com/150'" 
-            [alt]="product.name"
-            class="product-image"
-          />
-          <h3>{{ product.name }}</h3>
-          <p class="brand">{{ product.brand }}</p>
-          <p class="categories">{{ product.categories.slice(0, 2).join(', ') }}</p>
-        </div>
+<div class="search-container">
+  <header class="search-header">
+    <h1>Product Search</h1>
+    
+    <!-- ПОИСКОВАЯ СТРОКА -->
+    <div class="search-box">
+      <input 
+        type="search"
+        [value]="searchQuery()"
+        (input)="onSearchInput($any($event.target).value)"
+        placeholder="Search products by name..."
+        class="search-input"
+        aria-label="Search products"
+      />
+      @if (searchQuery()) {
+        <button 
+          class="clear-search-btn"
+          (click)="onClearSearch()"
+          aria-label="Clear search">
+        </button>
       }
     </div>
-  }
+  </header>
+  
+  <div class="search-layout">
+    <aside class="sidebar">
+      <app-product-filter 
+        [filters]="filters()"
+        (filtersChange)="onFiltersChange($event)">
+      </app-product-filter>
+    </aside>
+    
+    <main class="main-content">
+      @if (!loading() && pagination().totalItems > 0) {
+        <div class="results-info">
+          Found <strong>{{ pagination().totalItems }}</strong> products
+          @if (searchQuery()) {
+            <span class="search-term">for "{{ searchQuery() }}"</span>
+          }
+          @if (filters().categories.length > 0) {
+            <span class="filter-count">
+              · {{ filters().categories.length }} filter(s) active
+            </span>
+          }
+        </div>
+      }
 
-  <!-- Если ничего не найдено -->
-  @if (!loading() && products().length === 0) {
-    <div class="no-results">
-      No products found
-    </div>
-  }
+      <app-product-list 
+        [products]="products()"
+        [pagination]="pagination()"
+        [loading]="loading()"
+        [searchQuery]="searchQuery()"
+        (pageChange)="onPageChange($event)">
+      </app-product-list>
+    </main>
+  </div>
 </div>
