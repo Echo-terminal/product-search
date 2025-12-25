@@ -5,7 +5,7 @@
     <!-- ПОИСКОВАЯ СТРОКА -->
     <div class="search-box">
       <input 
-        type="search"
+        type="text"
         [value]="searchQuery()"
         (input)="onSearchInput($any($event.target).value)"
         placeholder="Search products by name..."
@@ -17,6 +17,7 @@
           class="clear-search-btn"
           (click)="onClearSearch()"
           aria-label="Clear search">
+          <ng-icon name="heroXMark" />
         </button>
       }
     </div>

@@ -17,14 +17,13 @@ export class ProductFilterComponent implements OnInit {
   filters = input.required<FilterState>();
   filtersChange = output<FilterState>();
 
-  // State
-  selectedCategories = signal<string[]>([]);
+  // State (ТОЛЬКО для категорий из БД, НЕ для выбранных)
   displayedCategories = signal<CategoryCount[]>([]);
   totalCategories = signal(0);
   currentOffset = signal(0);
   loadingCategories = signal(false);
 
-  // Computed
+  selectedCategories = computed(() => this.filters().categories);
   hasActiveFilters = computed(() => this.selectedCategories().length > 0);
   hasMoreCategories = computed(() => 
     this.displayedCategories().length < this.totalCategories()
@@ -34,7 +33,6 @@ export class ProductFilterComponent implements OnInit {
   constructor(private productService: ProductService) {}
 
   ngOnInit(): void {
-    this.selectedCategories.set([...this.filters().categories]);
     this.loadTotalCategoriesCount();
     this.loadCategories();
   }
@@ -47,8 +45,9 @@ export class ProductFilterComponent implements OnInit {
       ? current.filter(c => c !== category)
       : [...current, category];
     
-    this.selectedCategories.set(updated);
-    this.emitFilters();
+    this.filtersChange.emit({
+      categories: updated
+    });
   }
 
   isCategorySelected(category: string): boolean {
@@ -62,8 +61,9 @@ export class ProductFilterComponent implements OnInit {
   }
 
   onClearFilters(): void {
-    this.selectedCategories.set([]);
-    this.emitFilters();
+    this.filtersChange.emit({
+      categories: []
+    });
   }
 
   private loadTotalCategoriesCount(): void {
@@ -89,12 +89,6 @@ export class ProductFilterComponent implements OnInit {
         console.error('Failed to load categories:', error);
         this.loadingCategories.set(false);
       }
-    });
-  }
-
-  private emitFilters(): void {
-    this.filtersChange.emit({
-      categories: this.selectedCategories()
     });
   }
 }

@@ -3,10 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { ProductFilterComponent } from '../product-filter/product-filter';
 import { ProductListComponent } from '../product-list/product-list';
 import { ProductService, ProductSearchResult } from '../../core/services/product';
+import { heroXMark } from '@ng-icons/heroicons/outline';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+
 
 export interface FilterState {
   categories: string[];
@@ -15,14 +18,14 @@ export interface FilterState {
 @Component({
   selector: 'app-product-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, ProductFilterComponent, ProductListComponent],
+  imports: [CommonModule, FormsModule, ProductFilterComponent, ProductListComponent, NgIcon],
+  viewProviders: [provideIcons({  heroXMark })],
   templateUrl: './product-search.html',
   styleUrl: './product-search.css'
 })
 export class ProductSearchComponent implements OnInit {
   private readonly pageSize = 50;
   
-  // State
   searchQuery = signal('');
   filters = signal<FilterState>({
     categories: []
@@ -43,7 +46,6 @@ export class ProductSearchComponent implements OnInit {
 
   private searchSubject = new Subject<string>();
 
-  // Computed
   products = computed(() => this.searchResult().products);
   pagination = computed(() => this.searchResult().pagination);
   hasActiveFilters = computed(() => 
@@ -65,19 +67,15 @@ export class ProductSearchComponent implements OnInit {
       this.updateUrl();
     });
 
-    // Читаем параметры из URL при загрузке
     this.route.queryParams.subscribe(params => {
-      // Восстанавливаем поисковый запрос
       const query = params['q'] || '';
       this.searchQuery.set(query);
 
-      // Восстанавливаем категории (декодируем URL-encoded строку)
       const categoriesParam = params['categories'];
       let categories: string[] = [];
       
       if (categoriesParam) {
         try {
-          // Декодируем URL-encoded строку
           const decoded = decodeURIComponent(categoriesParam);
           categories = decoded
             .replace(/^\{/, '')
@@ -92,11 +90,9 @@ export class ProductSearchComponent implements OnInit {
       
       this.filters.set({ categories });
 
-      // Восстанавливаем страницу
       const page = parseInt(params['page']) || 1;
       this.currentPage.set(page);
 
-      // Выполняем поиск
       this.search();
     });
   }
