@@ -69,7 +69,7 @@ export class ProductService {
 
     // Фильтр по категориям
     if (categories.length > 0) {
-      dbQuery = dbQuery.overlaps('categories', categories);
+      dbQuery = dbQuery.contains('categories', categories);
     }
 
     return from(dbQuery).pipe(
