@@ -60,3 +60,54 @@
   font-size: 16px;
   margin: 2px;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 8px;
+  font-size: 20px;
+  align-items: last baseline;
+}
+
+.pagination-btn {
+  background-color: #e0e0e0;
+  border: none;
+  height: 32px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: #adadad;
+}
+.pagination button:disabled {
+  background-color: #b3b3b3;
+  color: #555;
+  cursor: not-allowed;
+}
+
+.pagination-page {
+  background-color: #e0e0e0;
+  border: none;
+  padding: 8px 12px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pagination-page.active {
+  font-weight: bold;
+  text-decoration: underline;
+  color: #fff;
+  background-color: #0c6ed9;
+}

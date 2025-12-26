@@ -1,11 +1,14 @@
 import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Product, PaginationInfo } from '../../core/services/product';
+import { heroArrowRight, heroArrowLeft } from '@ng-icons/heroicons/outline';
+import { NgIcon, provideIcons } from '@ng-icons/core';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgIcon],
+  viewProviders: [provideIcons({ heroArrowRight, heroArrowLeft })],
   templateUrl: './product-list.html',
   styleUrl: './product-list.css'
 })
