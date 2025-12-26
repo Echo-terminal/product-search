@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../../environments/environment';
 
+// Supabase service to manage DB connection
 @Injectable({
   providedIn: 'root'
 })
@@ -17,20 +18,5 @@ export class SupabaseService {
 
   get client() {
     return this.supabase;
-  }
-
-  // Тестовый метод - проверим что работает
-  async testConnection() {
-    const { data, error } = await this.supabase
-      .from('products')
-      .select('count');
-    
-    if (error) {
-      console.error('Connection error:', error);
-      return false;
-    }
-    
-    console.log('Connection successful!', data);
-    return true;
   }
 }

@@ -11,7 +11,7 @@ import { FilterState } from '../product-search/product-search';
   styleUrl: './product-filter.css'
 })
 export class ProductFilterComponent {
-  // Inputs - все данные от родителя
+  // Inputs
   filters = input.required<FilterState>();
   availableCategories = input.required<CategoryCount[]>();
   availableBrands = input.required<BrandCount[]>();
@@ -20,25 +20,26 @@ export class ProductFilterComponent {
   loadingCategories = input(false);
   loadingBrands = input(false);
   hasMoreCategories = input(false);
+  hasMoreBrands = input(false);
 
-  // Outputs - только события
+  // Outputs
   filtersChange = output<FilterState>();
   loadMoreCategories = output<void>();
+  loadMoreBrands = output<void>();
 
-  // Computed - читаем из родителя
-  selectedCategories = computed(() => this.filters().categories);
-  selectedBrands = computed(() => this.filters().brands);
-  hasActiveFilters = computed(() => 
-    this.selectedCategories().length > 0 || this.selectedBrands().length > 0
+  // Computed
+  hasActiveFilters = computed(() =>
+    this.filters().categories.length > 0 || this.filters().brands.length > 0
   );
 
-  // Категории
+  // === Categories ===
+  
   onCategoryToggle(category: string): void {
-    const current = this.selectedCategories();
+    const current = this.filters().categories;
     const updated = current.includes(category)
       ? current.filter(c => c !== category)
       : [...current, category];
-    
+
     this.filtersChange.emit({
       ...this.filters(),
       categories: updated
@@ -46,20 +47,17 @@ export class ProductFilterComponent {
   }
 
   isCategorySelected(category: string): boolean {
-    return this.selectedCategories().includes(category);
+    return this.filters().categories.includes(category);
   }
 
-  onLoadMoreCategories(): void {
-    this.loadMoreCategories.emit();
-  }
+  // === Brands ===
 
-  // Бренды
   onBrandToggle(brand: string): void {
-    const current = this.selectedBrands();
+    const current = this.filters().brands;
     const updated = current.includes(brand)
       ? current.filter(b => b !== brand)
       : [...current, brand];
-    
+
     this.filtersChange.emit({
       ...this.filters(),
       brands: updated
@@ -67,13 +65,23 @@ export class ProductFilterComponent {
   }
 
   isBrandSelected(brand: string): boolean {
-    return this.selectedBrands().includes(brand);
+    return this.filters().brands.includes(brand);
   }
+
+  // === Actions ===
 
   onClearFilters(): void {
     this.filtersChange.emit({
       categories: [],
       brands: []
     });
+  }
+
+  onLoadMoreCategories(): void {
+    this.loadMoreCategories.emit();
+  }
+
+  onLoadMoreBrands(): void {
+    this.loadMoreBrands.emit();
   }
 }

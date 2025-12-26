@@ -30,7 +30,7 @@ export class ProductListComponent {
     this.pagination().currentPage === this.pagination().totalPages
   );
 
-  // Методы для пагинации
+  // Methods of pagination
   onPrevious(): void {
     if (!this.isFirstPage()) {
       this.pageChange.emit(this.pagination().currentPage - 1);
@@ -53,18 +53,19 @@ export class ProductListComponent {
     const pages: (number | string)[] = [];
 
     if (total <= 7) {
-      // Показываем все страницы
+      // Show all pages
       for (let i = 1; i <= total; i++) {
         pages.push(i);
       }
     } else {
-      // Умная пагинация
+      // Show truncated pagination
       pages.push(1);
 
       if (current > 3) {
         pages.push('...');
       }
 
+      // Pages around current
       const start = Math.max(2, current - 1);
       const end = Math.min(total - 1, current + 1);
 

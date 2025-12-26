@@ -2,7 +2,6 @@
   <header class="search-header">
     <h1>Product Search</h1>
     
-    <!-- ПОИСКОВАЯ СТРОКА -->
     <div class="search-box">
       <input 
         type="text"
@@ -25,7 +24,7 @@
   
   <div class="search-layout">
     <aside class="sidebar">
-      <app-product-filter 
+      <app-product-filter
         [filters]="filters()"
         [availableCategories]="availableCategories()"
         [availableBrands]="availableBrands()"
@@ -34,8 +33,10 @@
         [loadingCategories]="loadingCategories()"
         [loadingBrands]="loadingBrands()"
         [hasMoreCategories]="hasMoreCategories()"
+        [hasMoreBrands]="hasMoreBrands()"
         (filtersChange)="onFiltersChange($event)"
-        (loadMoreCategories)="onLoadMoreCategories()">
+        (loadMoreCategories)="onLoadMoreCategories()"
+        (loadMoreBrands)="onLoadMoreBrands()">
       </app-product-filter>
     </aside>
     

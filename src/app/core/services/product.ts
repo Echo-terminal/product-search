@@ -12,6 +12,7 @@ export interface Product {
   countries: string[];
   image_url: string | null;
 }
+
 export interface PaginationInfo {
   currentPage: number;
   pageSize: number;
@@ -46,14 +47,17 @@ export interface SearchParams {
   page?: number;
   pageSize?: number;
 }
+
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
   private readonly DEFAULT_PAGE_SIZE = 20;
 
+  // Inject Supabase service
   constructor(private supabase: SupabaseService) {}
 
+  // Search products with filters and pagination
   searchProducts(params: SearchParams): Observable<ProductSearchResult> {
     const {
       query = '',
@@ -72,17 +76,14 @@ export class ProductService {
       .range(offset, to)
       .order('id');
 
-    // Текстовый поиск
     if (query.trim()) {
       dbQuery = dbQuery.ilike('name', `%${query.trim()}%`);
     }
 
-    // Фильтр по категориям (AND - продукт должен содержать ВСЕ выбранные категории)
     if (categories.length > 0) {
       dbQuery = dbQuery.contains('categories', categories);
     }
 
-    // Фильтр по брендам (OR - продукт может быть любого из выбранных брендов)
     if (brands.length > 0) {
       dbQuery = dbQuery.in('brand', brands);
     }
@@ -119,16 +120,19 @@ export class ProductService {
     );
   }
 
+  // Fetch number of categories based on current filters
   getCategoriesCount(
     searchQuery?: string,
     brands?: string[]
   ): Observable<number> {
     return from(
+      //DB function to get count of distinct categories based on filters
       this.supabase.client.rpc('get_categories_count', {
         search_query: searchQuery || null,
         selected_brands: brands && brands.length > 0 ? brands : null
       })
     ).pipe(
+      // Map response to number
       map(response => {
         if (response.error) throw response.error;
         return response.data || 0;
@@ -140,6 +144,7 @@ export class ProductService {
     );
   }
 
+  // Fetch paginated categories with counts based on current filters
   getCategoriesPaginated(
     limit: number,
     offset: number,
@@ -147,6 +152,7 @@ export class ProductService {
     brands?: string[]
   ): Observable<CategoryCount[]> {
     return from(
+      //DB function to get categories with counts based on filters
       this.supabase.client.rpc('get_categories_with_counts', {
         search_query: searchQuery || null,
         selected_brands: brands && brands.length > 0 ? brands : null,
@@ -154,6 +160,7 @@ export class ProductService {
         page_offset: offset
       })
     ).pipe(
+      // Map response to CategoryCount array
       map(response => {
         if (response.error) throw response.error;
         return (response.data as CategoryCount[]) || [];
@@ -165,16 +172,19 @@ export class ProductService {
     );
   }
 
+  // Similar methods for brands
   getBrandsWithCounts(
-    searchQuery?: string, 
-    categories?: string[]
+    searchQuery?: string,
+    categories?: string[],
+    limit: number = 50,
+    offset: number = 0
   ): Observable<BrandCount[]> {
     return from(
       this.supabase.client.rpc('get_brands_with_counts', {
         search_query: searchQuery || null,
         selected_categories: categories && categories.length > 0 ? categories : null,
-        page_limit: 100,
-        page_offset: 0
+        page_limit: limit,
+        page_offset: offset
       })
     ).pipe(
       map(response => {

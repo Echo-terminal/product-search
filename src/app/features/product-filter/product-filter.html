@@ -2,9 +2,7 @@
   <div class="filter-header">
     <h3>Filters</h3>
     @if (hasActiveFilters()) {
-      <button class="clear-btn" (click)="onClearFilters()">
-        Clear All
-      </button>
+      <button class="clear-btn" (click)="onClearFilters()">Clear All</button>
     }
   </div>
 
@@ -13,7 +11,7 @@
     <div class="filter-list">
       @for (brand of availableBrands(); track brand.brand) {
         <label class="filter-item">
-          <input 
+          <input
             type="checkbox"
             [checked]="isBrandSelected(brand.brand)"
             (change)="onBrandToggle(brand.brand)"
@@ -26,19 +24,22 @@
       @if (loadingBrands()) {
         <div class="loading-more">Loading...</div>
       }
-      
-      @if (!loadingBrands() && availableBrands().length === 0) {
-        <div class="no-results-filter">No brands available</div>
-      }
     </div>
+
+    @if (hasMoreBrands() && !loadingBrands()) {
+      <button class="load-more-btn" (click)="onLoadMoreBrands()">
+        Show More ({{ availableBrands().length }} of {{ totalBrands() }})
+      </button>
+    }
   </div>
 
+  <!-- Categories -->
   <div class="filter-section">
     <h4>Categories ({{ totalCategories() }})</h4>
     <div class="filter-list">
       @for (cat of availableCategories(); track cat.category) {
         <label class="filter-item">
-          <input 
+          <input
             type="checkbox"
             [checked]="isCategorySelected(cat.category)"
             (change)="onCategoryToggle(cat.category)"
@@ -50,10 +51,6 @@
 
       @if (loadingCategories()) {
         <div class="loading-more">Loading...</div>
-      }
-      
-      @if (!loadingCategories() && availableCategories().length === 0) {
-        <div class="no-results-filter">No categories available</div>
       }
     </div>
 
