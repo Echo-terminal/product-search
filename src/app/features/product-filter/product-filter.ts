@@ -1,6 +1,6 @@
-import { Component, OnInit, input, output, signal, computed } from '@angular/core';
+import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProductService, CategoryCount } from '../../core/services/product';
+import { CategoryCount, BrandCount } from '../../core/services/product';
 import { FilterState } from '../product-search/product-search';
 
 @Component({
@@ -10,42 +10,37 @@ import { FilterState } from '../product-search/product-search';
   templateUrl: './product-filter.html',
   styleUrl: './product-filter.css'
 })
-export class ProductFilterComponent implements OnInit {
-  private readonly CATEGORIES_PER_PAGE = 50;
-
-  // Inputs/Outputs
+export class ProductFilterComponent {
+  // Inputs - все данные от родителя
   filters = input.required<FilterState>();
+  availableCategories = input.required<CategoryCount[]>();
+  availableBrands = input.required<BrandCount[]>();
+  totalCategories = input.required<number>();
+  totalBrands = input.required<number>();
+  loadingCategories = input(false);
+  loadingBrands = input(false);
+  hasMoreCategories = input(false);
+
+  // Outputs - только события
   filtersChange = output<FilterState>();
+  loadMoreCategories = output<void>();
 
-  // State (ТОЛЬКО для категорий из БД, НЕ для выбранных)
-  displayedCategories = signal<CategoryCount[]>([]);
-  totalCategories = signal(0);
-  currentOffset = signal(0);
-  loadingCategories = signal(false);
-
+  // Computed - читаем из родителя
   selectedCategories = computed(() => this.filters().categories);
-  hasActiveFilters = computed(() => this.selectedCategories().length > 0);
-  hasMoreCategories = computed(() => 
-    this.displayedCategories().length < this.totalCategories()
+  selectedBrands = computed(() => this.filters().brands);
+  hasActiveFilters = computed(() => 
+    this.selectedCategories().length > 0 || this.selectedBrands().length > 0
   );
-  displayedCount = computed(() => this.displayedCategories().length);
 
-  constructor(private productService: ProductService) {}
-
-  ngOnInit(): void {
-    this.loadTotalCategoriesCount();
-    this.loadCategories();
-  }
-
+  // Категории
   onCategoryToggle(category: string): void {
     const current = this.selectedCategories();
-    const index = current.indexOf(category);
-    
-    const updated = index > -1
+    const updated = current.includes(category)
       ? current.filter(c => c !== category)
       : [...current, category];
     
     this.filtersChange.emit({
+      ...this.filters(),
       categories: updated
     });
   }
@@ -54,41 +49,31 @@ export class ProductFilterComponent implements OnInit {
     return this.selectedCategories().includes(category);
   }
 
-  onLoadMore(): void {
-    const newOffset = this.currentOffset() + this.CATEGORIES_PER_PAGE;
-    this.currentOffset.set(newOffset);
-    this.loadCategories();
+  onLoadMoreCategories(): void {
+    this.loadMoreCategories.emit();
+  }
+
+  // Бренды
+  onBrandToggle(brand: string): void {
+    const current = this.selectedBrands();
+    const updated = current.includes(brand)
+      ? current.filter(b => b !== brand)
+      : [...current, brand];
+    
+    this.filtersChange.emit({
+      ...this.filters(),
+      brands: updated
+    });
+  }
+
+  isBrandSelected(brand: string): boolean {
+    return this.selectedBrands().includes(brand);
   }
 
   onClearFilters(): void {
     this.filtersChange.emit({
-      categories: []
-    });
-  }
-
-  private loadTotalCategoriesCount(): void {
-    this.productService.getCategoriesCount().subscribe({
-      next: (count) => this.totalCategories.set(count),
-      error: (error) => console.error('Failed to load categories count:', error)
-    });
-  }
-
-  private loadCategories(): void {
-    this.loadingCategories.set(true);
-    
-    this.productService.getCategoriesPaginated(
-      this.CATEGORIES_PER_PAGE,
-      this.currentOffset()
-    ).subscribe({
-      next: (categories) => {
-        const current = this.displayedCategories();
-        this.displayedCategories.set([...current, ...categories]);
-        this.loadingCategories.set(false);
-      },
-      error: (error) => {
-        console.error('Failed to load categories:', error);
-        this.loadingCategories.set(false);
-      }
+      categories: [],
+      brands: []
     });
   }
 }

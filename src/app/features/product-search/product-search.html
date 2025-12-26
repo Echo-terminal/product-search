@@ -27,14 +27,22 @@
     <aside class="sidebar">
       <app-product-filter 
         [filters]="filters()"
-        (filtersChange)="onFiltersChange($event)">
+        [availableCategories]="availableCategories()"
+        [availableBrands]="availableBrands()"
+        [totalCategories]="totalCategories()"
+        [totalBrands]="totalBrands()"
+        [loadingCategories]="loadingCategories()"
+        [loadingBrands]="loadingBrands()"
+        [hasMoreCategories]="hasMoreCategories()"
+        (filtersChange)="onFiltersChange($event)"
+        (loadMoreCategories)="onLoadMoreCategories()">
       </app-product-filter>
     </aside>
     
     <main class="main-content">
       @if (!loading() && pagination().totalItems > 0) {
         <div class="results-info">
-          Found <strong>{{ pagination().totalItems }}</strong> products
+          <span class="total-results">Found <strong>{{ pagination().totalItems }}</strong> products</span>
           @if (searchQuery()) {
             <span class="search-term">for "{{ searchQuery() }}"</span>
           }

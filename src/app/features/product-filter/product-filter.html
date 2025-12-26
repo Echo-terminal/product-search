@@ -9,9 +9,34 @@
   </div>
 
   <div class="filter-section">
+    <h4>Brands ({{ totalBrands() }})</h4>
+    <div class="filter-list">
+      @for (brand of availableBrands(); track brand.brand) {
+        <label class="filter-item">
+          <input 
+            type="checkbox"
+            [checked]="isBrandSelected(brand.brand)"
+            (change)="onBrandToggle(brand.brand)"
+          />
+          <span class="filter-label">{{ brand.brand }}</span>
+          <span class="filter-count">({{ brand.count }})</span>
+        </label>
+      }
+
+      @if (loadingBrands()) {
+        <div class="loading-more">Loading...</div>
+      }
+      
+      @if (!loadingBrands() && availableBrands().length === 0) {
+        <div class="no-results-filter">No brands available</div>
+      }
+    </div>
+  </div>
+
+  <div class="filter-section">
     <h4>Categories ({{ totalCategories() }})</h4>
     <div class="filter-list">
-      @for (cat of displayedCategories(); track cat.category) {
+      @for (cat of availableCategories(); track cat.category) {
         <label class="filter-item">
           <input 
             type="checkbox"
@@ -26,11 +51,15 @@
       @if (loadingCategories()) {
         <div class="loading-more">Loading...</div>
       }
+      
+      @if (!loadingCategories() && availableCategories().length === 0) {
+        <div class="no-results-filter">No categories available</div>
+      }
     </div>
 
     @if (hasMoreCategories() && !loadingCategories()) {
-      <button class="load-more-btn" (click)="onLoadMore()">
-        Show More ({{ displayedCount() }} of {{ totalCategories() }})
+      <button class="load-more-btn" (click)="onLoadMoreCategories()">
+        Show More ({{ availableCategories().length }} of {{ totalCategories() }})
       </button>
     }
   </div>

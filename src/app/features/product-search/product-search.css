@@ -79,7 +79,6 @@ ng-icon {
   padding: 20px;
   border-radius: 8px;
   height: fit-content;
-  position: sticky;
   top: 20px;
 }
 
@@ -97,14 +96,18 @@ ng-icon {
   border-bottom: 1px solid #e0e0e0;
 }
 
-.results-info strong {
+.total-results {
+  margin-right: 5px;
+}
+
+.total-results strong {
   color: #333;
   font-weight: 600;
 }
 
 .search-term {
-  color: #0066cc;
-  font-style: italic;
+  color: #333;
+  font-weight: 600;
 }
 
 .filter-count {

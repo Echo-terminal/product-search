@@ -12,12 +12,6 @@ export interface Product {
   countries: string[];
   image_url: string | null;
 }
-
-export interface CategoryCount {
-  category: string;
-  count: number;
-}
-
 export interface PaginationInfo {
   currentPage: number;
   pageSize: number;
@@ -30,13 +24,28 @@ export interface ProductSearchResult {
   pagination: PaginationInfo;
 }
 
+export interface FilterState {
+  categories: string[];
+  brands: string[];
+}
+
+export interface BrandCount {
+  brand: string;
+  count: number;
+}
+
+export interface CategoryCount {
+  category: string;
+  count: number;
+}
+
 export interface SearchParams {
   query?: string;
   categories?: string[];
+  brands?: string[];
   page?: number;
   pageSize?: number;
 }
-
 @Injectable({
   providedIn: 'root'
 })
@@ -49,6 +58,7 @@ export class ProductService {
     const {
       query = '',
       categories = [],
+      brands = [],
       page = 1,
       pageSize = this.DEFAULT_PAGE_SIZE
     } = params;
@@ -67,9 +77,14 @@ export class ProductService {
       dbQuery = dbQuery.ilike('name', `%${query.trim()}%`);
     }
 
-    // Фильтр по категориям
+    // Фильтр по категориям (AND - продукт должен содержать ВСЕ выбранные категории)
     if (categories.length > 0) {
       dbQuery = dbQuery.contains('categories', categories);
+    }
+
+    // Фильтр по брендам (OR - продукт может быть любого из выбранных брендов)
+    if (brands.length > 0) {
+      dbQuery = dbQuery.in('brand', brands);
     }
 
     return from(dbQuery).pipe(
@@ -104,9 +119,15 @@ export class ProductService {
     );
   }
 
-  getCategoriesCount(): Observable<number> {
+  getCategoriesCount(
+    searchQuery?: string,
+    brands?: string[]
+  ): Observable<number> {
     return from(
-      this.supabase.client.rpc('get_categories_count')
+      this.supabase.client.rpc('get_categories_count', {
+        search_query: searchQuery || null,
+        selected_brands: brands && brands.length > 0 ? brands : null
+      })
     ).pipe(
       map(response => {
         if (response.error) throw response.error;
@@ -119,9 +140,16 @@ export class ProductService {
     );
   }
 
-  getCategoriesPaginated(limit: number, offset: number): Observable<CategoryCount[]> {
+  getCategoriesPaginated(
+    limit: number,
+    offset: number,
+    searchQuery?: string,
+    brands?: string[]
+  ): Observable<CategoryCount[]> {
     return from(
       this.supabase.client.rpc('get_categories_with_counts', {
+        search_query: searchQuery || null,
+        selected_brands: brands && brands.length > 0 ? brands : null,
         page_limit: limit,
         page_offset: offset
       })
@@ -131,8 +159,52 @@ export class ProductService {
         return (response.data as CategoryCount[]) || [];
       }),
       catchError(error => {
-        console.error('Categories pagination error:', error);
+        console.error('Categories error:', error);
         return of([]);
+      })
+    );
+  }
+
+  getBrandsWithCounts(
+    searchQuery?: string, 
+    categories?: string[]
+  ): Observable<BrandCount[]> {
+    return from(
+      this.supabase.client.rpc('get_brands_with_counts', {
+        search_query: searchQuery || null,
+        selected_categories: categories && categories.length > 0 ? categories : null,
+        page_limit: 100,
+        page_offset: 0
+      })
+    ).pipe(
+      map(response => {
+        if (response.error) throw response.error;
+        return (response.data as BrandCount[]) || [];
+      }),
+      catchError(error => {
+        console.error('Brands error:', error);
+        return of([]);
+      })
+    );
+  }
+
+  getBrandsCount(
+    searchQuery?: string,
+    categories?: string[]
+  ): Observable<number> {
+    return from(
+      this.supabase.client.rpc('get_brands_count', {
+        search_query: searchQuery || null,
+        selected_categories: categories && categories.length > 0 ? categories : null
+      })
+    ).pipe(
+      map(response => {
+        if (response.error) throw response.error;
+        return response.data || 0;
+      }),
+      catchError(error => {
+        console.error('Brands count error:', error);
+        return of(0);
       })
     );
   }
