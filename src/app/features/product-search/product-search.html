@@ -23,6 +23,33 @@
   </header>
   
   <div class="search-layout">
+    
+    <button
+      class="filter-toggle-btn"
+      (click)="ToggleFilterPanel()"
+      [class.open]="isFilterPanelOpen"
+      aria-label="Toggle Filters"
+    >
+      <ng-icon name="heroChevronRight" class="icon" />
+    </button>
+    
+    <div class="filter-overlay" [class.open]="isFilterPanelOpen" (click)="ToggleFilterPanel()">
+      <app-product-filter
+        [filters]="filters()"
+        [availableCategories]="availableCategories()"
+        [availableBrands]="availableBrands()"
+        [totalCategories]="totalCategories()"
+        [totalBrands]="totalBrands()"
+        [loadingCategories]="loadingCategories()"
+        [loadingBrands]="loadingBrands()"
+        [hasMoreCategories]="hasMoreCategories()"
+        [hasMoreBrands]="hasMoreBrands()"
+        (filtersChange)="onFiltersChange($event)"
+        (loadMoreCategories)="onLoadMoreCategories()"
+        (loadMoreBrands)="onLoadMoreBrands()">
+      </app-product-filter>  
+    </div>
+
     <aside class="sidebar">
       <app-product-filter
         [filters]="filters()"

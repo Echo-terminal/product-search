@@ -6,7 +6,7 @@ import { distinctUntilChanged, debounceTime } from 'rxjs/operators';
 import { ProductFilterComponent } from '../product-filter/product-filter';
 import { ProductListComponent } from '../product-list/product-list';
 import { ProductService, ProductSearchResult, CategoryCount, BrandCount } from '../../core/services/product';
-import { heroXMark } from '@ng-icons/heroicons/outline';
+import { heroXMark,heroChevronLeft,heroChevronRight } from '@ng-icons/heroicons/outline';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 
 export interface FilterState {
@@ -18,13 +18,19 @@ export interface FilterState {
   selector: 'app-product-search',
   standalone: true,
   imports: [CommonModule, FormsModule, ProductFilterComponent, ProductListComponent, NgIcon],
-  viewProviders: [provideIcons({ heroXMark })],
+  viewProviders: [provideIcons({ heroXMark, heroChevronLeft, heroChevronRight })],
   templateUrl: './product-search.html',
   styleUrl: './product-search.css'
 })
 export class ProductSearchComponent implements OnInit {
   private readonly PAGE_SIZE = 50;
   private readonly FILTERS_LOAD_SIZE = 50;
+
+  isFilterPanelOpen = false;
+
+  ToggleFilterPanel(): void {
+    this.isFilterPanelOpen = !this.isFilterPanelOpen;
+  }
 
   // State
   searchQuery = signal('');
