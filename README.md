@@ -25,10 +25,10 @@ The project is pre-configured with a public read-only Supabase instance, so you 
 
 3. Run the application
    ```bash
-   ng serve
+   ng serve --port preferred-port
    ```
 
-Navigate to http://localhost:4200/
+Navigate to http://localhost:{preferred-port}/
 
 ## Tech Stack
 
