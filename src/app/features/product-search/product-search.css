@@ -145,6 +145,8 @@ ng-icon {
   height: 100%;
   background-color: #fff;
   z-index: 999;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 @media (max-width: 450px) {
@@ -159,5 +161,8 @@ ng-icon {
   }
   .filter-toggle-btn.open .icon {
     transform: scaleX(-1);
+  }
+  .search-layout {
+    display: block;
   }
 }

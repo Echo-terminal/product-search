@@ -35,7 +35,7 @@
           <p class="product-brand">{{ product.brand }}</p>
           @if (product.categories.length > 0) {
             <div class="product-categories">
-              @for (category of product.categories.slice(0, 3); track category) {
+              @for (category of product.categories; track category) {
                 <span class="category-tag">{{ category }}</span>
               }
             </div>

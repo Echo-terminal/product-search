@@ -235,3 +235,9 @@
   color: #999;
   font-style: italic;
 }
+
+@media (max-width: 450px) {
+  .filter-section{
+    max-height: 300px;
+  }
+}
