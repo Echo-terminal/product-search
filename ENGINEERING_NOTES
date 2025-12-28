@@ -1,0 +1,63 @@
+# Engineering Notes
+
+## Architectural Decisions & Trade-offs
+
+### 1. Database-Level Aggregation (Facets)
+
+**Decision:** Instead of fetching all rows and calculating facet counts in JavaScript, I implemented custom PostgreSQL functions (`get_brands_with_counts`, `get_categories_with_counts`).
+
+**Reasoning:**
+- **Performance:** Iterating over thousands of rows in the application layer is inefficient. Postgres is highly optimized for counting and grouping.
+- **Bandwidth:** We only transfer the final aggregated data (brand name + count) to the client, not the entire dataset.
+
+### 2. Disjunctive Faceting Logic
+
+**Decision:** The SQL logic handles facets intelligently:
+- When filtering by **Category**, the **Brand** counts reflect the selection (narrowing down).
+- When filtering by **Brand**, the **Brand** list itself remains fully visible (showing other available options in the current search context), allowing users to switch or add brands easily without clearing filters first.
+
+### 3. Search Implementation (ILIKE vs FTS)
+
+**Trade-off:** I used `ILIKE` with wildcards for text search.
+- **Pro:** Simple to implement, requires no extra infrastructure setup, works well for a dataset of 10k products.
+- **Con:** Can be slow on millions of rows; does not handle typos or ranking relevance well.
+- **Future Improvement:** For scaling, I would switch to PostgreSQL Full Text Search (`tsvector`) or a dedicated engine like MeiliSearch.
+
+### 4. Security & Access Control
+
+**Decision:** Leveraged Supabase's Row Level Security (RLS) for robust access control.
+- **Read-Only Access:** Created a specific policy (`Allow public read access`) allowing `SELECT` operations for the `public` role.
+- **Write Protection:** Since no policies exist for `INSERT`, `UPDATE`, or `DELETE`, the database is implicitly write-protected against public API requests. This ensures data integrity even though the `anon` key is exposed on the client side.
+
+---
+
+## Challenges & Edge Cases
+
+### 1. Data Import & API Documentation
+
+**Challenge:** The Open Food Facts API documentation proved to be fragmented and difficult to navigate for a bulk import use case.
+
+**Solution:**
+- I performed a **network analysis (reverse engineering)** of the live Open Food Facts website to identify the internal API endpoints used for data fetching.
+- This allowed me to construct a reliable import script (`import-data.js`) to fetch a representative subset of products directly.
+
+### 2. Data Quality ("Dirty Data")
+
+**Challenge:** As a community-driven database, the data is inconsistent.
+- **Language Prefixes:** Tags often have prefixes like `en:`, `fr:`, `pl:`. However, testing revealed that a prefix does not guarantee the content's language (e.g., an `en:` tag might contain French text).
+- **Redundancy:** Similar categories exist with slight variations.
+
+**Decision:**
+- Rather than implementing a complex cleaning pipeline (which would be outside the scope of a frontend-focused assignment), I sanitized the inputs where possible but accepted some level of "noise" in the facets. This reflects a real-world scenario where frontend engineers must handle imperfect data gracefully.
+
+---
+
+## Future Scalability
+
+To scale this from 10k to 1M+ products, I would:
+
+1. **Database Normalization:** Refactor to a proper relational schema with many-to-many relationships instead of using array columns. This eliminates data duplication, makes category management easier (rename once vs updating thousands of arrays), and allows for more efficient JOINs. The current array approach works fine for a prototype but doesn't scale well.
+
+2. **Caching:** Implement Redis to cache the results of common facet queries, as these counts don't change instantly.
+3. **Debouncing:** Ensure the frontend search input is debounced (already implemented) to reduce database load.
+4. **Search Engine:** Migrate to Elasticsearch or MeiliSearch for better full-text search with typo tolerance and ranking.
