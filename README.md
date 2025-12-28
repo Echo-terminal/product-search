@@ -34,7 +34,7 @@ Navigate to http://localhost:4200/
 
 - **Frontend:** Angular 21 + TypeScript
 - **Styling:** CSS
-- **Database:** Supabase (PostgreSQL) — Public Read-only access
+- **Database:** PostgreSQL using Supabase platform (Public Read-only access)
 - **State Management:** URL-based (Syncing search and filters with query params)
 
 ## Key Features
