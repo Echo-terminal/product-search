@@ -50,7 +50,3 @@ Navigate to http://localhost:4200/
 - `src/app/features`: UI components for search, filtering, and product display
 - `import-data.js`: The custom script used to scrape and populate the database from Open Food Facts
 - `ENGINEERING_NOTES.md`: Detailed breakdown of technical decisions and trade-offs
-
-## License
-
-MIT
