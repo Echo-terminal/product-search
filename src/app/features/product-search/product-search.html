@@ -74,9 +74,9 @@
           @if (searchQuery()) {
             <span class="search-term">for "{{ searchQuery() }}"</span>
           }
-          @if (filters().categories.length > 0) {
+          @if (activeFiltersCount() > 0) {
             <span class="filter-count">
-              · {{ filters().categories.length }} filter(s) active
+              · {{ activeFiltersCount() }} filter(s) active
             </span>
           }
         </div>

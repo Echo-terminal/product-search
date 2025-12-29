@@ -67,6 +67,9 @@ export class ProductSearchComponent implements OnInit {
   // Computed
   products = computed(() => this.searchResult().products);
   pagination = computed(() => this.searchResult().pagination);
+  activeFiltersCount = computed(() => 
+    this.filters().categories.length + this.filters().brands.length
+  );
   
   hasMoreCategories = computed(() => 
     this.availableCategories().length < this.totalCategories()
