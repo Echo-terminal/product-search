@@ -10,8 +10,6 @@ The objective was to build a clean, Amazon-like search experience where users ca
 
 ## Quick Start (Local Run)
 
-The project is pre-configured with a public read-only Supabase instance, so you don't need to set up a database manually.
-
 1. Clone the repository
    ```bash
    git clone https://github.com/Echo-terminal/product-search.git
@@ -22,8 +20,17 @@ The project is pre-configured with a public read-only Supabase instance, so you 
    ```bash
    npm install
    ```
+3. Create environment file
 
-3. Run the application
+   Create a `.env` file in the root directory:
+   ```bash
+   NG_APP_SUPABASE_URL=your_supabase_url
+   NG_APP_SUPABASE_KEY=your_supabase_anon_key
+   ```
+
+   Contact me for the actual credentials, or set up your own Supabase instance
+   
+5. Run the application
    ```bash
    ng serve --port preferred-port
    ```
